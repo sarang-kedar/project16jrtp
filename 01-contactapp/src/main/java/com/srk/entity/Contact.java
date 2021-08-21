@@ -18,7 +18,7 @@ public class Contact {
 	@GeneratedValue
 	@Column(name = "CONTACT_ID")
 	private Integer contactId;
-	@Column(name = "CONTACT-NAME")
+	@Column(name = "CONTACT_NAME")
 	private String contactName;
 	@Column(name = "CONTACT_EMAIL")
 	private String contactEmail;
