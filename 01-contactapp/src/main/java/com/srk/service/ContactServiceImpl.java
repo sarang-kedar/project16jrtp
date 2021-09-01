@@ -1,6 +1,9 @@
 package com.srk.service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,35 +18,50 @@ public class ContactServiceImpl implements ContactService {
 
 	@Override
 	public boolean saveContact(Contact contact) {
-		try {
-			contact.setActiveSwitch('y');
-			contactRepository.save(contact);
+
+		contact.setActiveSwitch('Y');
+		Contact save = contactRepository.save(contact);
+		if (save != null && save.getContactId() != null) {
 			return true;
-		} catch (Exception e) {
-			return false;
 		}
+		return false;
 	}
 
 	@Override
 	public List<Contact> getAllContact() {
 		List<Contact> contacts = contactRepository.findAll();
-		return contacts;
+		List<Contact> collect = contacts.stream()
+				.filter(contact->contact.getActiveSwitch()=='Y')
+				.collect(Collectors.toList());
+		return collect;
 	}
 
 	@Override
 	public Contact getContactById(Integer contactId) {
-		Contact contact = contactRepository.findById(contactId).orElse(null);
-		return contact;
+		Optional<Contact> findById = contactRepository.findById(contactId);
+		if (findById.isPresent()) {
+			Contact contact = findById.get();
+			return contact;
+		}
+		return null;
 	}
 
 	@Override
 	public boolean deleteContactById(Integer contactId) {
-		try {
-			contactRepository.deleteById(contactId);
+		/*
+		 * boolean status = contactRepository.existsById(contactId); if (status) {
+		 * contactRepository.deleteById(contactId); return true; }
+		 */
+		
+		Optional<Contact> optional = contactRepository.findById(contactId);
+		if(optional.isPresent()) {
+			Contact contact = optional.get();
+			contact.setActiveSwitch('N');
+			contactRepository.save(contact);
 			return true;
-		} catch (Exception e) {
-			return false;
 		}
+		return false;
 	}
-
+	
+	
 }
